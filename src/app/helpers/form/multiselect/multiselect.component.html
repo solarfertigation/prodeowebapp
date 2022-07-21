@@ -1,0 +1,22 @@
+<div dropdown [autoClose]="true" [insideClick]="true" (onShown)="openSelect()">
+  <div dropdownToggle class="multiselect">
+    <span class="badge badge-{{color}} mr-2" *ngFor="let d of getSelectedData()">{{d[labelProperties]}} <i style='cursor:pointer' (click)="toggleData(d[valueProperties])" class='fa fa-times'></i></span>
+    <i class="frecciadown fa fa-chevron-down"></i>
+    <i class="frecciaup fa fa-chevron-up"></i>
+
+  </div>
+  <div *dropdownMenu class="dropdown-menu" role="menu" >
+    <div class="p-2 pl-3 pr-3">
+      
+  <input placeholder="Cerca..." type="search" [(ngModel)]="search" (keyup)="filterData()" (search)="filterData()" class="form-control" />
+</div>
+   <ul class="sub-dropdown-menu">
+
+    <li role="menuitem"  [ngClass]="{'selected': isSelected(d[valueProperties])}" *ngFor="let d of showdata">
+      <a (click)="toggleData(d[valueProperties])" class='dropdown-item'>
+      <i style="color:black" class="fa fa-square-o" *ngIf='showSelect && !isSelected(d[valueProperties])' aria-hidden="true"></i>
+      <i  style="color:black" class="fa fa-check-square-o" *ngIf='showSelect && isSelected(d[valueProperties])' aria-hidden="true"></i>
+      {{d[labelProperties]}}</a></li>
+  </ul>
+  </div>
+</div>

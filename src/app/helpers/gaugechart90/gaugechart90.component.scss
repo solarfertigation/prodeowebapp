@@ -1,0 +1,95 @@
+.arco {
+  z-index: 1;
+  position: absolute;
+  background-color: #006605;
+  width: 360px;
+  height: 180px;
+  top: 0%;
+  border-radius: 225px 225px 0 0;
+}
+
+.arco2 {
+  z-index: 3;
+  position: absolute;
+  background-color: white;
+  width: 225px;
+  height: 112.5px;
+  top: 67.5px;
+  margin-left: 67.5px;
+  margin-right: auto;
+  border-radius: 225px 225px 0 0;
+}
+
+.arco-s1 {
+  z-index: 2;
+  position: absolute;
+  background-color: #0b00ab;
+  width: 360px;
+  height: 180px;
+  top: 180px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 0 0 180px 180px;
+  transform-origin: center top;
+
+}
+
+.gaouge-container {
+  position: relative;
+  margin-top: 50px;
+  width: 180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tachometer_delimiter {
+
+  width: 180px;
+  height: 180px;
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  overflow: hidden;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  margin-top: 50px;
+
+}
+
+.mint {
+  position: absolute;
+  top: 120px;
+  left: 22px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+}
+
+.maxt {
+  position: absolute;
+  top: -13px;
+  right: 7px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+}
+
+.needle {
+  position: absolute;
+  left: calc(100% - 122px);
+  top: 114px;
+  transform-origin: 122px 25px;
+}
+
+
+.orvalue {
+  position: absolute;
+  top: 126px;
+  width: 100%;
+  text-align: left;
+  font-size: 16px;
+  color: white;
+  font-weight: bold;
+  
+  left: 176px;
+}
