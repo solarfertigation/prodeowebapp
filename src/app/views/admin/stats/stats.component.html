@@ -1,0 +1,266 @@
+<div class="animated fadeIn" *ngIf="loaded">
+  <div class="card card-default">
+    <div class="card-body">
+      <h1>STATISTICHE</h1>
+
+      <div class="clearfix"></div>
+      <div class='row'>
+        <div class="col-md-4">
+          <label>Periodo</label>
+          <input type="text" placeholder="Daterangepicker" class="form-control" bsDaterangepicker [(ngModel)]="range"
+            (bsValueChange)="changedDate()" [bsConfig]="{ isAnimated: true }" />
+
+        </div>
+        <div class="col-md-4">
+          <label>Seleziona dashboard da visualizzare</label>
+          <select name="dashboard_uniqueid" [(ngModel)]="dashboard_uniqueid" (change)="changedDashboard()" class='form-control'>
+            <option *ngFor="let d of dashboard" [value]="d.uniqueid">{{d.name}}</option>
+          </select>
+        </div>
+        <div class="col-md-4" style='margin-top: 25px;text-align: right;'>
+          <div dropdown>
+            <a dropdownToggle  href="javascript:void(0)" (click)="false" class="btn btn-outline-success">Opzioni</a>
+            <ul *dropdownMenu class="dropdown-menu" role="menu">
+              <li role="menuitem"> <a href="javascript:void(0)" (click)="addWidget()" class="dropdown-item">Nuovo widget</a></li>
+              <li role="menuitem"><a href="javascript:void(0)" (click)="rinominaDashboard()" class="dropdown-item">Rinomina dashboard</a></li>
+              <li role="menuitem"><a href="javascript:void(0)" (click)="addDashboard()" class="dropdown-item">Nuova dashboard</a></li>
+              <li class="divider dropdown-divider"></li>
+              <li role="menuitem"><a href="javascript:void(0)" class="dropdown-item text-warning"  (click)="emptyDashboard()">Svuota dashboard</a></li>
+              <li role="menuitem"><a href="javascript:void(0)" *ngIf="dashboard.length > 1" class="dropdown-item text-danger"  (click)="deleteDashboard()">Elimina dashboard</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row"  [sortablejs]="data.widgets" [sortablejsOptions]="sortableOptions">
+    <div *ngFor="let widget of data.widgets" class="col-md-{{widget.size}}">
+      
+      <div class="card card-default">
+        <div class="card-head" style="border-bottom:1px solid #ccc;padding:3px">
+          <i *ngIf="widget.property =='temperature'" class='fa fa-thermometer-empty'></i>
+          <i *ngIf="widget.property =='humidity'" class='fa fa-tint'></i>
+          <img  *ngIf="widget.property =='water'" src='assets/img/water.svg' style='width: 18px;' />
+          <i *ngIf="widget.property =='batteryPercentage'" class='fa fa-battery-half'></i>
+          <i *ngIf="widget.property =='batteryVoltage'" class='fa fa-bolt'></i>
+          {{widget.deviceName}} - {{widget.propertyName.label}}
+          <span *ngIf="widget.type=='tachometer' && widget.property != 'water'">{{widget.minTreshold}}{{this.unitamisura[widget.property]}} - {{widget.maxTreshold}}{{this.unitamisura[widget.property]}}</span>
+
+          <a href="javascript:void(0)"  (click)="deleteWidget(widget.index)" class=" float-right" ><i style='font-size: 20px;' class="fa fa-times-circle-o"></i></a>
+          <div *ngIf="widget.type=='linear'" class="btn-group float-right mr-3" dropdown>
+            <a href dropdownToggle (click)="false"> Campionamento {{campionamenti[widget.sampling]}}</a>
+          <ul *dropdownMenu class="dropdown-menu" role="menu">
+            <li role="menuitem"><a (click)="setSampling('15m',widget.index)" class="dropdown-item" href="javascript:void(0)">Quartorario*</a></li>
+            <li role="menuitem"><a (click)="setSampling('1h',widget.index)" class="dropdown-item" href="javascript:void(0)">Orario*</a></li>
+            <li role="menuitem"><a (click)="setSampling('1d',widget.index)" class="dropdown-item" href="javascript:void(0)">Giornaliero</a></li>
+            <li role="menuitem"><a (click)="setSampling('1m',widget.index)" class="dropdown-item" href="javascript:void(0)">Mensile</a></li>
+            <li style="padding:5x"><small>* i campionamenti orario e quartorario mostrano solamente i dati relativi all'ultimo giorno del periodo in esame</small></li>
+          </ul>
+         
+        </div>
+
+
+
+          <div class="btn-group float-right mr-3" dropdown>
+            <a href dropdownToggle (click)="false"> Dimensione {{dimensioni[widget.size]}}</a>
+          <ul *dropdownMenu class="dropdown-menu" role="menu">
+
+            <li role="menuitem"><a (click)="setSize('5',widget.index)" class="dropdown-item" href="javascript:void(0)">40%</a></li>
+            <li role="menuitem"><a (click)="setSize('6',widget.index)" class="dropdown-item" href="javascript:void(0)">50%</a></li>
+            <li role="menuitem"><a (click)="setSize('7',widget.index)" class="dropdown-item" href="javascript:void(0)">60%</a></li>
+            <li role="menuitem"><a (click)="setSize('8',widget.index)" class="dropdown-item" href="javascript:void(0)">66%</a></li>
+            <li role="menuitem"><a (click)="setSize('12',widget.index)" class="dropdown-item" href="javascript:void(0)">100%</a></li>
+  
+            
+          </ul>
+         
+        </div>
+        </div>
+        <div class="card-body" style="height:400px" >
+
+          <canvas  *ngIf="widget.type=='linear' && hasData != undefiend && hasData[widget.index]" baseChart class="chart"
+          [datasets]="lineChartData[widget.index]"
+          [labels]="lineChartLabels[widget.index]"
+          [options]="lineChartOptions"
+          [colors]="lineChartColours"
+          [legend]="lineChartLegend"
+          [chartType]="lineChartType" >
+        </canvas>
+        <app-gaugechart  *ngIf="widget.type=='tachometer' && widget.property != 'water' && hasData != undefiend && hasData[widget.index]" [value]="valueTachometer[widget.index]" [options]="optionsTachometer[widget.index]"></app-gaugechart>
+        <app-gaugechart90  *ngIf="widget.type=='tachometer' && widget.property == 'water' && hasData != undefiend && hasData[widget.index]" [value]="valueTachometer[widget.index]" [options]="{minValue:0,maxValue:1,minTreshold:0,maxTreshold:0.5}"></app-gaugechart90>
+
+       
+        
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div bsModal #nuovoWidget="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-info" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Elimina Tipologia di dispositivo</h4>
+        <button type="button" class="close" (click)="nuovoWidget.hide()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+            <label>Seleziona un device</label>
+            <select (change)="changedDevice()" class="form-control" name='selectedDevice' [(ngModel)]='selectedDevice'>
+              <option *ngFor="let d of devices" [value]="d.deviceID">{{d.name}}</option>
+            </select>
+          </div>
+
+          <div class="col-md-12">
+            <label>Seleziona una proprietà</label>
+            <select class="form-control" name='selectedProperties' [(ngModel)]='selectedProperties'>
+              <option *ngFor="let p of properties" [value]="p.value">{{p.label}}</option>
+            </select>
+          </div>
+          <div class="col-md-12">
+            <label>Tipo di grafico</label>
+            <select class="form-control" name='type' [(ngModel)]='type'>
+              <option value="linear">Grafico lineare</option>
+              <option value="tachometer">Tachimetro</option>
+
+            </select>
+          </div>
+          <div class="col-md-12" *ngIf="type=='tachometer' && selectedProperties != 'water'">
+            <label>Soglia minima</label>
+            <input type="number" class="form-control" name="minTreshold" [(ngModel)]='minTreshold'/>
+          </div>
+          <div class="col-md-12" *ngIf="type=='tachometer'  && selectedProperties != 'water'">
+            <label>Soglia massima</label>
+            <input type="number" class="form-control" name="maxTreshold" [(ngModel)]='maxTreshold'/>
+          </div>
+          
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="nuovoWidget.hide()">Annulla</button>
+        <button type="button" class="btn btn-info" (click)="confirmAggiungi()">Salva</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div bsModal #eliminaWidget="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-danger" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Elimina widget</h4>
+        <button type="button" class="close" (click)="eliminaWidget.hide()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+
+            <strong>Attenzione:</strong> stai per eliminare un widget<br />
+            Proseguire?
+          
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="eliminaWidget.hide()">Annulla</button>
+        <button type="button" class="btn btn-danger" (click)="confirmEliminaWidget()">Sì, elimina widget</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #nuovaDashboard="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-info" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">{{modal_type}} dashboard</h4>
+        <button type="button" class="close" (click)="nuovaDashboard.hide()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+
+            <label>Nome dashboard</label>
+            <input type="text" class="form-control" name="dashboard_name" [(ngModel)]="dashboard_name" />
+            <em class="text-danger" *ngIf="show_dashboard_error">Il campo Nome dashboard è obbligatorio</em>
+          
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="nuovaDashboard.hide()">Annulla</button>
+        <button type="button" class="btn btn-info" (click)="salvaDashboard()">Salva</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #modalEmptyDashboard="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-warning" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Svuota dashboard</h4>
+        <button type="button" class="close" (click)="modalEmptyDashboard.hide()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+
+            <strong>Attenzione:</strong> stai per eliminare tutti i widget presenti in questa dasboard<br />
+            Proseguire?
+          
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="modalEmptyDashboard.hide()">Annulla</button>
+        <button type="button" class="btn btn-warning" (click)="confirmEmptyDashboard()">Sì, svuota dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #eliminaDashboard="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-danger" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Elimina dashboard</h4>
+        <button type="button" class="close" (click)="eliminaDashboard.hide()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+
+            <strong>Attenzione:</strong> stai per eliminare una dashboard, tutti i widget in essa contenuti andranno persi, sarà tuttavia possibile aggiungerli su altri dashboard.<br />
+            Proseguire?
+          
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="eliminaDashboard.hide()">Annulla</button>
+        <button type="button" class="btn btn-danger" (click)="confirmEliminaDashboard()">Sì, elimina dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,56 @@
+.mapSection{
+  display: inline-block;
+  width: 150px;
+  height: 200px;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+.mapSection:first-child{
+
+  border-left: 1px solid #ccc;
+}
+.mapRow:first-child .mapSection{
+  border-top: 1px solid #ccc;
+}
+  
+.mapRow{
+  text-align: center;
+}
+
+.color0{
+  background-color: #f79b9b;
+  color:black;
+}
+
+.color1{
+  background-color: #f59bf7;
+  color:black;
+}
+
+.color2{
+  background-color: #bb9bf7;
+  color:black;
+}
+
+.color3{
+  background-color: #9bcbf7;
+  color:black;
+}
+
+.color4{
+  background-color: #9bf7d4;
+  color:black;
+}
+
+.color5{
+  background-color: #daf79b;
+  color:black;
+}
+
+.mapContainer{
+  padding-top: 65px;
+}
+
+.mapSection.fobdidden{
+  background-color: #CCC!important;
+}

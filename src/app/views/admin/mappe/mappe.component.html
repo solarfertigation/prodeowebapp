@@ -1,0 +1,79 @@
+<div class="animated fadeIn" *ngIf="loaded">
+  <div class="card card-default">
+    <div class="card-body" >
+      <h1>MAPPE</h1>
+
+      <div class="clearfix"></div>
+
+      <tabset>
+        <tab *ngFor="let map of maps">
+          <ng-template tabHeading>{{map.name}}</ng-template>
+      <br />
+          <div class="row">
+            <div class="col-md-7">
+              <div>
+              <div *ngFor="let y of map.mapData" class='mapRow'>
+                <div *ngFor="let seg of y" class="mapSection {{seg.class}}" [ngClass]="{'fobdidden' : seg.device.forbidden != undefined && seg.device.forbidden}">
+                  <div class="mapContainer" style="height: 150px;">
+                    <span *ngIf="seg.device.forbidden == undefined || seg.device.forbidden == false">{{seg.device.name}}</span>
+                    <div *ngIf="seg.device.type=='temperature' && (seg.device.forbidden == undefined || seg.device.forbidden == false)">
+
+                      Temperatura: 
+                      <span *ngIf="seg.device.lastValue!=undefined && seg.device.lastValue.temperature != undefined">{{seg.device.lastValue.temperature}}°C</span>
+                      <span *ngIf="seg.device.lastValue==undefined || seg.device.lastValue.temperature == undefined">-</span>
+                    </div>
+                    <div *ngIf="seg.device.type=='temperature' && (seg.device.forbidden == undefined || seg.device.forbidden == false)">
+                      Umidità: 
+
+                      <span *ngIf="seg.device.lastValue!=undefined && seg.device.lastValue.humidity != undefined">{{seg.device.lastValue.humidity}}%</span>
+                      <span *ngIf="seg.device.lastValue==undefined || seg.device.lastValue.humidity == undefined">-</span>
+                    </div>
+                    <div *ngIf="seg.device.forbidden != undefined && seg.device.forbidden">
+                      <br /><br /><br />
+                    </div>
+                    
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            </div>
+            <div class="col-md-5">
+              
+              <div *ngFor="let dev of map.devices"> 
+                <span *ngIf="dev.forbidden == undefined || dev.forbidden == false">
+                {{dev.name}}  
+                <span *ngIf="dev.lastValue!=undefined"> | </span>
+                <span *ngIf="dev.lastValue==undefined"> | Nessun valore rilevato</span>
+                <span *ngIf="dev.type=='temperature'">
+                  
+
+                  
+                      <strong *ngIf="dev.lastValue!=undefined && dev.lastValue.temperature != undefined"> <i class='fa fa-thermometer-empty'></i> {{dev.lastValue.temperature}}°C</strong>
+                      
+                      <span *ngIf="dev.lastValue!=undefined && dev.lastValue.temperature != undefined  && dev.lastValue.humidity != undefined"> | </span>
+                      
+
+                      <strong *ngIf="dev.lastValue!=undefined && dev.lastValue.humidity != undefined"> <i class='fa fa-tint'></i> {{dev.lastValue.humidity}}%</strong>
+                      
+                </span>
+                <span *ngIf="dev.lastValue!=undefined">
+                  <strong><img src='assets/img/water.svg' style='width: 18px;' />
+                    <span *ngIf="dev.lastValue.water == 0" class="badge badge-success ml-1"><i class='fa fa-check'></i></span>
+                    <span *ngIf="dev.lastValue.water == 1" class="badge badge-danger ml-1"><i class='fa fa-exclamation-triangle'></i></span>
+                  </strong>
+                  <span> | </span>
+                  <strong><i class='fa fa-battery-half'></i> {{dev.lastValue.batteryPercentage}}% </strong>
+                  <span> | </span>
+                  <strong><i class='fa fa-bolt'></i> {{dev.lastValue.batteryVoltage}}V </strong>
+                </span>
+              </span>
+              </div>
+            </div>
+          </div>
+        </tab>
+        
+      </tabset>
+    </div>
+  </div>
+</div>

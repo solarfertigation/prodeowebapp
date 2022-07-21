@@ -1,0 +1,179 @@
+<div class="animated fadeIn" *ngIf="(section=='nuovo' || section=='modifica') && loaded">
+  <div class="card card-default">
+    <div class="card-body" >
+      <h1>{{section=="nuovo"?"Nuovo":"Modifica"}} Utente</h1>
+      <div class='float-right'>
+        <a [routerLink]="['/admin/gestioneutenti']" style='margin-top:-70px' class='btn btn-warning text-white'><i class="fa fa-arrow-circle-left" aria-hidden="true"></i> Indietro</a>
+      </div>
+      <div class="clearfix"></div>
+      <div class='row'>
+        <div class='col-md-6'>
+          <label>Nome</label>
+          <input type="text" class="form-control" name='name' [ngClass]="{'is-invalid': errors && errors.name}" [(ngModel)]="utente.name" />
+          <em class="text-danger" *ngIf="errors && errors.name">{{errors.name}}</em>
+        </div>
+        <div class='col-md-6'>
+          <label>Cognome</label>
+          <input type="text" class="form-control" name='lastname'  [ngClass]="{'is-invalid': errors && errors.lastname}"  [(ngModel)]="utente.lastname" />
+          <em class="text-danger" *ngIf="errors && errors.lastname">{{errors.lastname}}</em>
+        </div>
+        
+      </div>
+      <div class='row'>
+        <div class='col-md-6'>
+          <label>Username</label>
+          <input type="text" class="form-control" [readonly]="utente.utype=='edit'" [ngClass]="{'is-invalid': errors && errors.username}" [(ngModel)]="utente.username" />
+          <em class="text-danger" *ngIf="errors && errors.username">{{errors.username}}</em>
+        </div>
+        <div class='col-md-6'>
+          <label>Ruolo</label>
+          <select name="roleId" class="form-control" name='role' [(ngModel)]="utente.role">
+            <option *ngFor="let role of roles" [value]=role.role>{{role.label}}</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class='col-md-6'>
+          <label>Password</label>
+          <input type="password" class="form-control" name='password' [ngClass]="{'is-invalid': errors && errors.password}" [(ngModel)]="utente.password" />
+          <em class="text-danger" *ngIf="errors && errors.password">{{errors.password}}</em>
+        </div>
+
+        <div class='col-md-6'>
+          <label>Conferma password</label>
+          <input type="password" class="form-control" name='confirmPassword' [ngClass]="{'is-invalid': errors && errors.confirmPassword}" [(ngModel)]="utente.confirmPassword" />
+          <em class="text-danger" *ngIf="errors && errors.confirmPassword">{{errors.confirmPassword}}</em>
+        </div>
+      </div>
+     
+     
+      <div class="row">
+        <div class="col-md-6" *ngIf="utente.role == 'admin'">
+          <label>Numeri di cellulare, separati da virgole, ai quali inviare SMS in casi di acqua alta</label>
+          <input type="text" class="form-control"  [ngClass]="{'is-invalid': errors && errors.mobileNumbers}" [(ngModel)]="utente.mobileNumbers" />
+          <em class="text-danger" *ngIf="errors && errors.mobileNumbers">{{errors.mobileNumbers}}</em>
+        </div>
+         
+        <div class="col-md-6" *ngIf="utente.role == 'user'">
+          <label>Dispositivi visualizzabili</label>
+          <app-multiselect
+            [data]="devices"
+            labelProperties="name"
+            valueProperties="deviceID"
+            name="devices"
+            [(ngModel)]="utente.devices"
+            [showSelect]="true"
+          ></app-multiselect>
+        </div>
+        
+        </div>
+      
+      <div class="row">
+        <div class="col-md-12 mt-2">
+        <input type='button' class="btn btn-success" (click)="salva()" value='Salva'/>
+      </div>
+      </div>
+
+
+
+      
+    </div>
+  </div>
+</div>
+<div class="animated fadeIn" *ngIf="section=='list'">
+  <div class="card card-default">
+    <div class="card-body" >
+      <h1>Lista Utenti</h1>
+      <div class='float-right'>
+        <a [routerLink]="['/admin/gestioneutenti/add']" style='margin-top:-70px' class='btn btn-success'><i class='fa fa-plus-circle'></i> Nuovo utente</a>
+      </div>
+      <div class="clearfix"></div>
+      <div style="width:250px;float:left;margin-bottom:10px">
+        <label>Filtra per ruolo</label>
+        <select class="form-control" [(ngModel)]="roleId" name="roleId" (change)="reloadData()">
+          <option value="">Tutti i ruoli</option>
+          <option *ngFor="let role of roles" [value]=role.id>{{userNameText(role.roleName)}}</option>
+
+        </select>
+      </div>
+
+      <div style="width:250px;float:right;margin-bottom:10px">
+        <label>Cerca</label>
+        <input type='search' placeholder="Cerca..." class='form-control' [(ngModel)]="search" name="search" (keyup)="reloadData()"   (search)="reloadData()" />
+      </div>
+      <div class="clearfix"></div>
+      
+      <table class="table table-striped">
+        <tr>
+          <th>Username</th>
+          <th>Nome</th>
+          <th>Cognome</th>
+          <th>Ruolo</th>
+          <th style='width: 100px;'></th>
+        </tr>
+        <tbody *ngIf="loaded">
+          <tr *ngFor="let user of users">
+            <td>{{user.username}}</td>
+            <td>{{user.name}}</td>
+            <td>{{user.lastName}}</td>
+            <td>{{userNameText(user.role)}}</td>
+            <td>
+              <div class="btn-group" dropdown>
+                <a href dropdownToggle (click)="false"><i class="fa fa-ellipsis-v"></i></a>
+              <ul *dropdownMenu class="dropdown-menu" role="menu">
+                <li role="menuitem"><a [routerLink]="['/admin/gestioneutenti/edit/'+user.username]"  class="dropdown-item" href="#"><i class='fa fa-edit'></i> Modifica Utente</a></li>
+                
+                <li class="divider dropdown-divider"></li>
+                <li role="menuitem"><a class="dropdown-item text-danger" (click)="elimina(user.username)" href="javascript:void(0)"><i class='fa fa-times'></i> Elimina utente</a>
+                </li>
+              </ul>
+              
+            </div>
+            </td>
+
+          </tr>
+        </tbody>
+        <tbody *ngIf="!loaded">
+          <tr>
+            <th colspan="5">Caricamento in corso...</th>
+          </tr>
+        </tbody>
+      </table>
+      
+      <pagination *ngIf="total>perPage"
+        [boundaryLinks]="true" 
+        [totalItems]="total" 
+        [itemsPerPage]="perPage"
+        [(ngModel)]="page"
+        class="pagination-sm" 
+        [maxSize]="6"
+        (pageChanged)="pageChanged($event)"
+        previousText="&lsaquo;" 
+        nextText="&rsaquo;" 
+        firstText="&laquo;" 
+        lastText="&raquo;">
+      </pagination>
+    </div>
+  </div>
+</div>
+
+<div bsModal #deleteUser="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-danger" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Elimina utente</h4>
+        <button type="button" class="close" (click)="deleteUser.hide()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Attenzione, stai per eliminare un utente, proseguire?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="deleteUser.hide()">Annulla</button>
+        <button type="button" class="btn btn-danger" (click)="confirmElimina()">Sì, elimina utente</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
